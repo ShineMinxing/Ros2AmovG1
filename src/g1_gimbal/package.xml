@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>g1_gimbal</name>
+  <version>0.0.1</version>
+  <description>All-in-one ROS2 package for amov gimbal</description>
+  <maintainer email="your_email@domain.com">YourName</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- 运行依赖 -->
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

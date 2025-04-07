@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>video_play</name>
+  <version>0.0.1</version>
+  <description>A package for playing video and publishing images at 30Hz.</description>
+  <maintainer email="your_email@example.com">Your Name</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
