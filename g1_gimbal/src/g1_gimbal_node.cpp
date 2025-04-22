@@ -1,6 +1,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMXFE/Target_Angle 的消息类型
+#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMX/Target_Angle 的消息类型
 #include "amovGimbal/amov_gimbal.h"
 #include "serial/serial.h"
 #include <chrono>
@@ -60,7 +60,7 @@ class GimbalNode : public rclcpp::Node
 {
 public:
   GimbalNode()
-    : Node("gimbal_node")
+    : Node("g1_gimbal_node")
     , frameYaw_(0.0)
     , imuPitch_(0.0)
   {
@@ -71,8 +71,8 @@ public:
     gimbal_ = std::make_shared<amovGimbal::gimbal>(gimbal_id, uart_.get());
     gimbal_->startStack();
 
-    // 2) 发布云台状态到 SMXFE/Gimbal_State（原先代码保留）
-    pub_state_ = this->create_publisher<std_msgs::msg::String>("SMXFE/Gimbal_State", 10);
+    // 2) 发布云台状态到 SMX/Gimbal_State（原先代码保留）
+    pub_state_ = this->create_publisher<std_msgs::msg::String>("SMX/Gimbal_State", 10);
 
     // 3) 注册云台状态回调，获取 frameYaw, imuPitch 等
     auto cb = [](double fr, double fp, double fy,
@@ -87,9 +87,9 @@ public:
     gimbal_->parserAuto(cb, this);
     gimbal_->setGimabalHome();
 
-    // 4) 订阅 SMXFE/Target_Angle（假设消息中包含 [angleX, angleY, tilt]）
+    // 4) 订阅 SMX/Target_Angle（假设消息中包含 [angleX, angleY, tilt]）
     sub_angle_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-      "SMXFE/Target_Angle", 10,
+      "SMX/Target_Angle", 10,
       std::bind(&GimbalNode::onTargetAngle, this, std::placeholders::_1)
     );
 
@@ -115,7 +115,7 @@ private:
       imuPitch_  = imuPitch;   // "imuPitch" from the callback
     }
 
-    // 发布状态到 SMXFE/Gimbal_State
+    // 发布状态到 SMX/Gimbal_State
     std_msgs::msg::String msg;
     std::stringstream ss;
     ss << "[Gimbal State]\n"
@@ -132,7 +132,7 @@ private:
   }
 
   // --------------------------------------------------------------------------------
-  // (B) 订阅 SMXFE/Target_Angle 的回调
+  // (B) 订阅 SMX/Target_Angle 的回调
   //     - 读取 [angleX, angleY, tilt] (若仅前2个有效，随你定义)
   //     - 结合当前 frameYaw, imuPitch 计算新的云台目标角度
   //     - 调用 setGimabalPos() 进行控制输出

@@ -9,12 +9,12 @@ class GimbalCameraNode : public rclcpp::Node
 public:
   GimbalCameraNode() : Node("g1_camera_node")
   {
-    // 发布话题名可和原先的 SMXFE/Gimbal_Camera 一致，方便兼容
-    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMXFE/Gimbal_Camera", 10);
+    // 发布话题名可和原先的 SMX/Gimbal_Camera 一致，方便兼容
+    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMX/Gimbal_Camera", 10);
 
     // 构建GStreamer管线
     std::string pipeline =
-        "rtspsrc location=rtsp://192.168.2.64:554/H264 "
+        "rtspsrc location=rtsp://192.168.123.64:554/H264 "
         "protocols=GST_RTSP_LOWER_TRANS_UDP latency=0 "
         "! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink";
 

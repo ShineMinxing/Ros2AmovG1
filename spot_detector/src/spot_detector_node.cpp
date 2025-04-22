@@ -12,14 +12,14 @@ public:
   {
     // 订阅图像话题
     image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-      "SMXFE/Gimbal_Camera", 10,
+      "SMX/Gimbal_Camera", 10,
       std::bind(&SpotDetectorNode::imageCallback, this, std::placeholders::_1));
 
     // 发布标记后的视频图像
-    video_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMXFE/Target_Video", 10);
+    video_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMX/Target_Video", 10);
 
     // 发布角度信息，数据为 [angle_x_deg, angle_y_deg, tilt_deg]
-    angle_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("SMXFE/Target_Angle", 10);
+    angle_pub_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("SMX/Target_Angle", 10);
 
     // 设置相机的水平和垂直视场（单位：度）
     fov_h_ = 125.0;
@@ -92,11 +92,11 @@ private:
 
     }
 
-    // 将修改后的图像发布到 SMXFE/Target_Video
+    // 将修改后的图像发布到 SMX/Target_Video
     auto out_msg = cv_bridge::CvImage(msg->header, "bgr8", frame).toImageMsg();
     video_pub_->publish(*out_msg);
 
-    // 组装角度信息并发布到 SMXFE/Target_Angle (Float32MultiArray)
+    // 组装角度信息并发布到 SMX/Target_Angle (Float32MultiArray)
     std_msgs::msg::Float32MultiArray angle_msg;
     angle_msg.data.push_back(static_cast<float>(angle_x_deg));
     angle_msg.data.push_back(static_cast<float>(angle_y_deg));
