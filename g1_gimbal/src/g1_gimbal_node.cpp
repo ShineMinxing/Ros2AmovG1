@@ -1,6 +1,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
-#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMX/GimbalAngularVelocityCmd 的消息类型
+#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMX/TargetImageAngle 的消息类型
 #include "amovGimbal/amov_gimbal.h"
 #include "serial/serial.h"
 #include <chrono>
@@ -89,7 +89,7 @@ public:
 
     // 4) 订阅 SMX/Target_Angle（假设消息中包含 [angleX, angleY, tilt]）
     sub_angle_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-      "SMX/GimbalAngularVelocityCmd", 10,
+      "SMX/TargetImageAngle", 10,
       std::bind(&GimbalNode::onTargetAngle, this, std::placeholders::_1)
     );
 
@@ -132,7 +132,7 @@ private:
   }
 
   // --------------------------------------------------------------------------------
-  // (B) 订阅 SMX/GimbalAngularVelocityCmd 的回调
+  // (B) 订阅 SMX/TargetImageAngle 的回调
   //     - 读取 [angleX, angleY, tilt] (若仅前2个有效，随你定义)
   //     - 结合当前 frameYaw, imuPitch 计算新的云台目标角度
   //     - 调用 setGimabalPos() 进行控制输出
