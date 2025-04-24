@@ -9,8 +9,8 @@ class GimbalCameraNode : public rclcpp::Node
 public:
   GimbalCameraNode() : Node("g1_camera_node")
   {
-    // 发布话题名可和原先的 SMX/Gimbal_Camera 一致，方便兼容
-    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMX/Gimbal_Camera", 10);
+    // 发布话题名可和原先的 SMX/GimbalCamera 一致，方便兼容
+    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMX/GimbalCamera", 10);
 
     // 构建GStreamer管线
     std::string pipeline =
