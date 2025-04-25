@@ -1,5 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMX/GimbalAngleCmd 的消息类型
+#include <std_msgs/msg/float64_multi_array.hpp>  // 订阅 SMX/GimbalAngleCmd 的消息类型
 #include "amovGimbal/amov_gimbal.h"
 #include "serial/serial.h"
 #include <chrono>
@@ -71,7 +71,7 @@ public:
     gimbal_->startStack();
 
     // 2) 发布云台状态到 SMX/Gimbal_State（原先代码保留）
-    pub_state_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("SMX/GimbalState", 10);
+    pub_state_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("SMX/GimbalState", 10);
 
     // 3) 注册云台状态回调，获取 frameYaw, imuPitch 等
     auto cb = [](double fr, double fp, double fy,
@@ -87,7 +87,7 @@ public:
     gimbal_->setGimabalHome();
 
     // 4) 订阅 SMX/Target_Angle（假设消息中包含 [angleX, angleY, tilt]）
-    sub_angle_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
+    sub_angle_ = this->create_subscription<std_msgs::msg::Float64MultiArray>(
       "SMX/GimbalAngleCmd", 10,
       std::bind(&GimbalNode::onTargetAngle, this, std::placeholders::_1)
     );
@@ -115,16 +115,16 @@ private:
     }
 
     // 发布状态到 SMX/GimbalState
-    std_msgs::msg::Float32MultiArray msg;
+    std_msgs::msg::Float64MultiArray msg;
     msg.data = {
-      static_cast<float>(frameRoll),
-      static_cast<float>(framePitch),
-      static_cast<float>(frameYaw),
-      static_cast<float>(imuRoll),
-      static_cast<float>(imuPitch),
-      static_cast<float>(imuYaw),
-      static_cast<float>(fovX),
-      static_cast<float>(fovY)
+      static_cast<double>(frameRoll),
+      static_cast<double>(framePitch),
+      static_cast<double>(frameYaw),
+      static_cast<double>(imuRoll),
+      static_cast<double>(imuPitch),
+      static_cast<double>(imuYaw),
+      static_cast<double>(fovX),
+      static_cast<double>(fovY)
     };
     pub_state_->publish(msg);
   }
@@ -135,16 +135,16 @@ private:
   //     - 结合当前 frameYaw, imuPitch 计算新的云台目标角度
   //     - 调用 setGimabalPos() 进行控制输出
   // --------------------------------------------------------------------------------
-  void onTargetAngle(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
+  void onTargetAngle(const std_msgs::msg::Float64MultiArray::SharedPtr msg)
   {
     if (msg->data.size() < 2) {
       RCLCPP_WARN(this->get_logger(), "Target_Angle message size < 2, ignoring...");
       return;
     }
 
-    float angleX = msg->data[0]; // e.g. unit=deg
-    float angleY = msg->data[1]; // e.g. unit=deg
-    float tilt   = 0.0f;
+    double angleX = msg->data[0]; // e.g. unit=deg
+    double angleY = msg->data[1]; // e.g. unit=deg
+    double tilt   = 0.0f;
     if (msg->data.size() >= 3) {
       tilt = msg->data[2];
     }
@@ -176,8 +176,8 @@ private:
   std::shared_ptr<UART> uart_;
   std::shared_ptr<amovGimbal::gimbal> gimbal_;
 
-  rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr pub_state_;
-  rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_angle_;
+  rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr pub_state_;
+  rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr sub_angle_;
 
   // 由 onGimbalUpdate() 更新的云台状态
   double frameYaw_;
