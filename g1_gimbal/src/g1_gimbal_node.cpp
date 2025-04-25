@@ -1,6 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
-#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMX/TargetImageAngle 的消息类型
+#include <std_msgs/msg/float32_multi_array.hpp>  // 订阅 SMX/GimbalAngleCmd 的消息类型
 #include "amovGimbal/amov_gimbal.h"
 #include "serial/serial.h"
 #include <chrono>
@@ -72,7 +71,7 @@ public:
     gimbal_->startStack();
 
     // 2) 发布云台状态到 SMX/Gimbal_State（原先代码保留）
-    pub_state_ = this->create_publisher<std_msgs::msg::String>("SMX/GimbalState", 10);
+    pub_state_ = this->create_publisher<std_msgs::msg::Float32MultiArray>("SMX/GimbalState", 10);
 
     // 3) 注册云台状态回调，获取 frameYaw, imuPitch 等
     auto cb = [](double fr, double fp, double fy,
@@ -89,7 +88,7 @@ public:
 
     // 4) 订阅 SMX/Target_Angle（假设消息中包含 [angleX, angleY, tilt]）
     sub_angle_ = this->create_subscription<std_msgs::msg::Float32MultiArray>(
-      "SMX/TargetImageAngle", 10,
+      "SMX/GimbalAngleCmd", 10,
       std::bind(&GimbalNode::onTargetAngle, this, std::placeholders::_1)
     );
 
@@ -116,23 +115,22 @@ private:
     }
 
     // 发布状态到 SMX/GimbalState
-    std_msgs::msg::String msg;
-    std::stringstream ss;
-    ss << "[Gimbal State]\n"
-       << "frameYaw  : " << frameYaw   << "\n"
-       << "frameRoll : " << frameRoll  << "\n"
-       << "framePitch: " << framePitch << "\n"
-       << "imuYaw    : " << imuYaw     << "\n"
-       << "imuRoll   : " << imuRoll    << "\n"
-       << "imuPitch  : " << imuPitch   << "\n"
-       << "fovX      : " << fovX       << "\n"
-       << "fovY      : " << fovY;
-    msg.data = ss.str();
+    std_msgs::msg::Float32MultiArray msg;
+    msg.data = {
+      static_cast<float>(frameRoll),
+      static_cast<float>(framePitch),
+      static_cast<float>(frameYaw),
+      static_cast<float>(imuRoll),
+      static_cast<float>(imuPitch),
+      static_cast<float>(imuYaw),
+      static_cast<float>(fovX),
+      static_cast<float>(fovY)
+    };
     pub_state_->publish(msg);
   }
 
   // --------------------------------------------------------------------------------
-  // (B) 订阅 SMX/TargetImageAngle 的回调
+  // (B) 订阅 SMX/GimbalAngleCmd 的回调
   //     - 读取 [angleX, angleY, tilt] (若仅前2个有效，随你定义)
   //     - 结合当前 frameYaw, imuPitch 计算新的云台目标角度
   //     - 调用 setGimabalPos() 进行控制输出
@@ -161,7 +159,7 @@ private:
 
     AMOV_GIMBAL_POS_T speed;
     speed.yaw   = 3*angleX;
-    speed.pitch = 3*angleY;
+    speed.pitch = -3*angleY;
     speed.roll  = 0.0f;
     
     if (currentPitch > 45)
@@ -178,7 +176,7 @@ private:
   std::shared_ptr<UART> uart_;
   std::shared_ptr<amovGimbal::gimbal> gimbal_;
 
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_state_;
+  rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr pub_state_;
   rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr sub_angle_;
 
   // 由 onGimbalUpdate() 更新的云台状态

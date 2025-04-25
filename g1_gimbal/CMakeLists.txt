@@ -12,7 +12,7 @@ include_directories(
   include
 )
 
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/x86_64-linux)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/aarch64-linux)
 
 add_executable(g1_gimbal_node src/g1_gimbal_node.cpp)
 target_link_libraries(g1_gimbal_node

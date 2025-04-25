@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>g1_control</name>
+  <version>0.1.0</version>
+  <description>gimbal control node for Amov G1.</description>
+
+  <maintainer email="you@example.com">Your Name</maintainer>
+  <license>Apache-2.0</license>
+
+  <!-- 构建工具 -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- 依赖 -->
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -13,10 +13,21 @@ public:
     image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMX/GimbalCamera", 10);
 
     // 构建GStreamer管线
+    // std::string pipeline =
+    //     "rtspsrc location=rtsp://192.168.123.64:554/H264 "
+    //     "protocols=GST_RTSP_LOWER_TRANS_UDP latency=0 "
+    //     "! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink";
     std::string pipeline =
-        "rtspsrc location=rtsp://192.168.123.64:554/H264 "
-        "protocols=GST_RTSP_LOWER_TRANS_UDP latency=0 "
-        "! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink";
+      "rtspsrc location=rtsp://192.168.123.64:554/H264 "
+      "protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true "
+      "! rtph264depay "
+      "! h264parse "
+      "! nvv4l2decoder   enable-max-performance=1 disable-dpb=1 "   // GPU 解码
+      "! nvvidconv output-buffers=1 "
+      "! video/x-raw, format=(string)BGRx              "            // 仍在 NVMM
+      "! videoconvert ! video/x-raw,format=BGR         "            // 拷到系统内存
+      "! appsink sync=false max-buffers=1 drop=true";               // 仅保留最新帧
+
 
     cap_.open(pipeline, cv::CAP_GSTREAMER);
     if (!cap_.isOpened()) {
