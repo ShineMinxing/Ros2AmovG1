@@ -122,14 +122,14 @@ private:
     double yaw_target = yaw_robot + yaw_gimbal + yaw_image;
     double pitch_target = pitch_robot + pitch_gimbal + pitch_image;
 
-    if (std::fabs(yaw_target - yaw_robot) > 0.8)
+    if (std::fabs(yaw_target - yaw_robot) > 1.0)
     {
       robot_motion_enable = 1;
       robot_motion_yaw = (yaw_target - yaw_robot) * 1.0;
       robot_motion_yaw = std::clamp(robot_motion_yaw,  -1.0, 1.0);
       publish_action(25202123, 0.0, 0.0, robot_motion_yaw, 0.0);
     }
-    else if (std::fabs(yaw_target - yaw_robot) > 0.3 && robot_motion_enable > 0)
+    else if (std::fabs(yaw_target - yaw_robot) > 0.5 && robot_motion_enable > 0)
     {
       robot_motion_yaw = (yaw_target - yaw_robot) * 1.0;
       robot_motion_yaw = std::clamp(robot_motion_yaw,  -1.0, 1.0);
@@ -162,13 +162,13 @@ private:
 
     publish_action(22232400, robot_posture_yaw, robot_posture_pitch, 0.0, 0.0);
 
-    // 输出目标角度
-    std::cout << "yaw_robot-" << yaw_robot << " pitch_robot-" << pitch_robot << std::endl;
-    std::cout << "yaw_gimbal-" << yaw_gimbal << " pitch_gimbal-" << pitch_gimbal << std::endl;
-    std::cout << "yaw_image-" << yaw_image << " pitch_image-" << pitch_image << std::endl;
-    std::cout << "yaw_target - yaw_robot: " << yaw_target - yaw_robot << std::endl;
-    std::cout << "robot_motion_yaw: " << robot_motion_yaw << std::endl;
-    std::cout << "________________"  << std::endl;
+    // // 输出目标角度
+    // std::cout << "yaw_robot-" << yaw_robot << " pitch_robot-" << pitch_robot << std::endl;
+    // std::cout << "yaw_gimbal-" << yaw_gimbal << " pitch_gimbal-" << pitch_gimbal << std::endl;
+    // std::cout << "yaw_image-" << yaw_image << " pitch_image-" << pitch_image << std::endl;
+    // std::cout << "yaw_target - yaw_robot: " << yaw_target - yaw_robot << std::endl;
+    // std::cout << "robot_motion_yaw: " << robot_motion_yaw << std::endl;
+    // std::cout << "________________"  << std::endl;
   }
 };
 

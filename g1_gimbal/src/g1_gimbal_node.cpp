@@ -158,8 +158,8 @@ private:
     }
 
     AMOV_GIMBAL_POS_T speed;
-    speed.yaw   = 3*angleX;
-    speed.pitch = -3*angleY;
+    speed.yaw   = angleX;
+    speed.pitch = angleY;
     speed.roll  = 0.0f;
     
     if (currentPitch > 45)
