@@ -115,8 +115,8 @@ private:
     if (std::fabs(yaw_target - yaw_robot) > 0.3 || std::fabs(pitch_target - pitch_robot) > 0.3)
       robot_posture_enable = 1;
     if (robot_posture_enable) {
-      robot_posture_yaw   =std::clamp(robot_posture_yaw+ (yaw_target-yaw_robot)*0.02, -0.5,0.5);
-      robot_posture_pitch =std::clamp(robot_posture_pitch+(pitch_target-pitch_robot)*0.02,-0.5,0.5);
+      robot_posture_yaw   =std::clamp(robot_posture_yaw+ (yaw_target-yaw_robot)*0.05, -0.5,0.5);
+      robot_posture_pitch =std::clamp(robot_posture_pitch+(pitch_target-pitch_robot)*0.05,-0.5,0.5);
     }
     publish_action(22232400, robot_posture_yaw, robot_posture_pitch,0,0);
 
