@@ -95,6 +95,12 @@ private:
     std::chrono::duration<double> dt = now - last_time;
     last_time = now;
 
+    if(dt.count() > 0.5)
+    {
+      robot_posture_yaw = 0;
+      robot_posture_pitch = 0;
+    }
+
     // 发布初步命令
     publish_action(22202100, yaw_image, pitch_image, 0, 0);
 
@@ -102,7 +108,7 @@ private:
     double pitch_target = pitch_robot + pitch_gimbal + pitch_image;
 
     // 运动控制示例
-    if (std::fabs(yaw_target - yaw_robot) > 1.0) {
+    if (std::fabs(yaw_target - yaw_robot) > 1.0 && dt.count() < 0.5) {
       robot_motion_enable = 1;
       robot_motion_yaw = std::clamp((yaw_target - yaw_robot)*1.0, -1.0, 1.0);
       publish_action(25202123, 0, 0, robot_motion_yaw, 0);
