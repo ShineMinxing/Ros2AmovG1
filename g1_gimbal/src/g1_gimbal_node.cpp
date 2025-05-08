@@ -41,9 +41,9 @@ public:
   {
     // 声明并获取参数
     auto state_topic = declare_parameter<std::string>(
-      "GIMBAL_STATE_TOPIC", "SMX/GimbalState");
+      "GIMBAL_STATE_TOPIC", "TEST/GimbalState");
     auto cmd_topic   = declare_parameter<std::string>(
-      "GIMBAL_CMD_TOPIC",   "SMX/GimbalAngleCmd");
+      "GIMBAL_CMD_TOPIC",   "TEST/GimbalAngleCmd");
     auto port_name   = declare_parameter<std::string>(
       "UART_PORT",         "/dev/ttyUSB0");
     auto gimbal_id   = declare_parameter<std::string>(
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
   opts.arguments({
     "--ros-args",
     "--params-file",
-    "src/Ros2AmovG1/config.yaml"
+    "/home/smx/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
   });
   auto node = std::make_shared<GimbalNode>(opts);
   rclcpp::spin(node);

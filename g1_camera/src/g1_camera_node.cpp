@@ -12,7 +12,7 @@ public:
   {
     // 参数声明和获取
     auto topic_name = this->declare_parameter<std::string>(
-      "GIMBAL_CAMERA", "SMX/GimbalCamera");
+      "GIMBAL_CAMERA", "TEST/GimbalCamera");
     auto pipeline = this->declare_parameter<std::string>(
       "GIMBAL_GSTREAMER",
       "rtspsrc location=rtsp://192.168.123.64:554/H264 "
@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
   options.arguments({
     "--ros-args",
     "--params-file",
-    "src/Ros2AmovG1/config.yaml"
+    "/home/smx/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
   });
   auto node = std::make_shared<GimbalCameraNode>(options);
   rclcpp::spin(node);

@@ -15,13 +15,13 @@ public:
   {
     // 声明并获取话题参数
     target_angle_topic_ = this->declare_parameter<std::string>(
-      "TARGET_ANGLE_TOPIC", "SMX/TargetImageAngle");
+      "TARGET_ANGLE_TOPIC", "TEST/TargetImageAngle");
     odom_topic_ = this->declare_parameter<std::string>(
-      "ODOM_TOPIC", "SMX/Odom");
+      "ODOM_TOPIC", "TEST/Odom");
     gimbal_state_topic_ = this->declare_parameter<std::string>(
-      "GIMBAL_STATE_TOPIC", "SMX/GimbalState");
+      "GIMBAL_STATE_TOPIC", "TEST/GimbalState");
     sport_cmd_topic_ = this->declare_parameter<std::string>(
-      "SPORT_CMD_TOPIC", "SMX/SportCmd");
+      "SPORT_CMD_TOPIC", "TEST/SportCmd");
 
     // ===== 订阅 =====
     target_angle_sub_ = create_subscription<std_msgs::msg::Float64MultiArray>(
@@ -160,7 +160,7 @@ int main(int argc, char ** argv)
   options.arguments({
     "--ros-args",
     "--params-file",
-    "src/Ros2AmovG1/config.yaml"
+    "/home/smx/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
   });
   auto node = std::make_shared<G1ControlNode>(options);
   rclcpp::spin(node);
