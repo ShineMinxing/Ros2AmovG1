@@ -7,59 +7,59 @@
 class GimbalCameraNode : public rclcpp::Node
 {
 public:
-  GimbalCameraNode() : Node("g1_camera_node")
+  explicit GimbalCameraNode(const rclcpp::NodeOptions & options)
+  : Node("g1_camera_node", options)
   {
-    // 发布话题名可和原先的 SMX/GimbalCamera 一致，方便兼容
-    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("SMX/GimbalCamera", 10);
-
-    // 构建GStreamer管线
-    // std::string pipeline =
-    //     "rtspsrc location=rtsp://192.168.123.64:554/H264 "
-    //     "protocols=GST_RTSP_LOWER_TRANS_UDP latency=0 "
-    //     "! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! appsink";
-    std::string pipeline =
+    // 参数声明和获取
+    auto topic_name = this->declare_parameter<std::string>(
+      "GIMBAL_CAMERA", "SMX/GimbalCamera");
+    auto pipeline = this->declare_parameter<std::string>(
+      "GIMBAL_GSTREAMER",
       "rtspsrc location=rtsp://192.168.123.64:554/H264 "
       "protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true "
       "! rtph264depay "
       "! h264parse "
-      "! nvv4l2decoder   enable-max-performance=1 disable-dpb=1 "   // GPU 解码
+      "! nvv4l2decoder enable-max-performance=1 disable-dpb=1 "
       "! nvvidconv output-buffers=1 "
-      "! video/x-raw, format=(string)BGRx              "            // 仍在 NVMM
-      "! videoconvert ! video/x-raw,format=BGR         "            // 拷到系统内存
-      "! appsink sync=false max-buffers=1 drop=true";               // 仅保留最新帧
+      "! video/x-raw,format=(string)BGRx "
+      "! videoconvert ! video/x-raw,format=BGR "
+      "! appsink sync=false max-buffers=1 drop=true"
+    );
 
+    // 创建 Publisher
+    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>(
+      topic_name, 10);
 
+    // 打开 GStreamer RTSP 管线
     cap_.open(pipeline, cv::CAP_GSTREAMER);
     if (!cap_.isOpened()) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to open GStreamer RTSP pipeline!");
+      RCLCPP_ERROR(this->get_logger(),
+        "Failed to open GStreamer pipeline: %s", pipeline.c_str());
     } else {
-      RCLCPP_INFO(this->get_logger(), "RTSP stream opened successfully (low-latency).");
+      RCLCPP_INFO(this->get_logger(),
+        "RTSP stream opened on topic %s", topic_name.c_str());
     }
 
-    // 定时器：约33ms发布一帧图像 -> ~30fps
-    auto period = std::chrono::milliseconds(33);
+    // 定时器：每 33ms 发布一帧
     timer_ = this->create_wall_timer(
-      period, std::bind(&GimbalCameraNode::timerCallback, this));
+      std::chrono::milliseconds(33),
+      std::bind(&GimbalCameraNode::timerCallback, this)
+    );
   }
 
 private:
   void timerCallback()
   {
-    if (!cap_.isOpened()) {
-      return;
-    }
-
+    if (!cap_.isOpened()) return;
     cv::Mat frame;
     cap_ >> frame;
-    if (frame.empty()) {
-      return;
-    }
+    if (frame.empty()) return;
 
-    // 将OpenCV图像包装成ROS消息并发布
-    auto cv_img = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame);
-    cv_img.header.stamp = this->now();
-    cv_img.header.frame_id = "camera_link";
-    image_pub_->publish(*cv_img.toImageMsg());
+    auto img_msg = cv_bridge::CvImage(
+      std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+    img_msg->header.stamp = this->now();
+    img_msg->header.frame_id = "camera_link";
+    image_pub_->publish(*img_msg);
   }
 
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
@@ -67,10 +67,17 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 };
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<GimbalCameraNode>();
+  // 构造 NodeOptions 并自动加载同目录下 config.yaml
+  rclcpp::NodeOptions options;
+  options.arguments({
+    "--ros-args",
+    "--params-file",
+    "src/Ros2AmovG1/config.yaml"
+  });
+  auto node = std::make_shared<GimbalCameraNode>(options);
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
