@@ -43,7 +43,7 @@ public:
     auto state_topic = declare_parameter<std::string>(
       "GIMBAL_STATE_TOPIC", "TEST/GimbalState");
     auto cmd_topic   = declare_parameter<std::string>(
-      "GIMBAL_CMD_TOPIC",   "TEST/GimbalAngleCmd");
+      "GIMBAL_CMD_TOPIC",   "TEST/JoyFloatCmd");
     auto port_name   = declare_parameter<std::string>(
       "UART_PORT",         "/dev/ttyUSB0");
     auto gimbal_id   = declare_parameter<std::string>(
@@ -97,8 +97,8 @@ private:
   void onTargetAngle(
     const std_msgs::msg::Float64MultiArray::SharedPtr msg)
   {
-    if (msg->data.size() < 2) return;
-    double angX = msg->data[0], angY = msg->data[1];
+    if (msg->data.size() < 3 || msg->data[0] != 30000001) return;
+    double angX = msg->data[1], angY = msg->data[2];
     double currentYaw=0, currentPitch=0;
     { std::lock_guard<std::mutex> lock(mt_);
       currentYaw = frameYaw_; currentPitch = imuPitch_; }
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
   opts.arguments({
     "--ros-args",
     "--params-file",
-    "/home/smx/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
+    "/home/unitree/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
   });
   auto node = std::make_shared<GimbalNode>(opts);
   rclcpp::spin(node);

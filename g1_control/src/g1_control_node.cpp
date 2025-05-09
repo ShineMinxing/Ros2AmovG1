@@ -22,6 +22,8 @@ public:
       "GIMBAL_STATE_TOPIC", "TEST/GimbalState");
     sport_cmd_topic_ = this->declare_parameter<std::string>(
       "SPORT_CMD_TOPIC", "TEST/SportCmd");
+    joy_cmd_topic_ = this->declare_parameter<std::string>(
+      "JOY_CMD_TOPIC", "TEST/JoyFloatCmd");
 
     // ===== 订阅 =====
     target_angle_sub_ = create_subscription<std_msgs::msg::Float64MultiArray>(
@@ -37,8 +39,11 @@ public:
       std::bind(&G1ControlNode::gimbal_state_callback, this, std::placeholders::_1));
 
     // ===== 发布 =====
-    action_pub_ = create_publisher<std_msgs::msg::Float64MultiArray>(
+    go2_action_pub_ = create_publisher<std_msgs::msg::Float64MultiArray>(
       sport_cmd_topic_, 10);
+
+    gimbal_action_pub_ = create_publisher<std_msgs::msg::Float64MultiArray>(
+      joy_cmd_topic_, 10);
 
     RCLCPP_INFO(get_logger(), "g1_control_node started.\n"
       "  target_angle_topic: %s\n"
@@ -81,11 +86,19 @@ private:
     }
   }
 
-  void publish_action(double code, double p1, double p2, double p3, double p4)
+  void go2_action_pub_fun(double code, double p1, double p2, double p3, double p4)
   {
     std_msgs::msg::Float64MultiArray out;
     out.data = {code, p1, p2, p3, p4};
-    action_pub_->publish(out);
+    go2_action_pub_->publish(out);
+  }
+
+
+  void gimbal_action_pub_fun(double code, double p1, double p2)
+  {
+    std_msgs::msg::Float64MultiArray out;
+    out.data = {code, p1, p2};
+    gimbal_action_pub_->publish(out);
   }
 
   void update_target_and_publish()
@@ -102,7 +115,7 @@ private:
     }
 
     // 发布初步命令
-    publish_action(22202100, yaw_image, pitch_image, 0, 0);
+    gimbal_action_pub_fun(30000001, -50*yaw_image, -50*pitch_image);
 
     double yaw_target   = yaw_robot + yaw_gimbal + yaw_image;
     double pitch_target = pitch_robot + pitch_gimbal + pitch_image;
@@ -111,9 +124,9 @@ private:
     if (std::fabs(yaw_target - yaw_robot) > 1.0 && dt.count() < 0.5) {
       robot_motion_enable = 1;
       robot_motion_yaw = std::clamp((yaw_target - yaw_robot)*1.0, -1.0, 1.0);
-      publish_action(25202123, 0, 0, robot_motion_yaw, 0);
+      go2_action_pub_fun(25202123, 0, 0, robot_motion_yaw, 0);
     } else if (robot_motion_enable > 0) {
-      publish_action(16170000, 0, 0, 0, 0);
+      go2_action_pub_fun(16170000, 0, 0, 0, 0);
       robot_motion_enable = 0;
     }
 
@@ -124,7 +137,7 @@ private:
       robot_posture_yaw   =std::clamp(robot_posture_yaw+ (yaw_target-yaw_robot)*0.05, -0.5,0.5);
       robot_posture_pitch =std::clamp(robot_posture_pitch+(pitch_target-pitch_robot)*0.05,-0.5,0.5);
     }
-    publish_action(22232400, robot_posture_yaw, robot_posture_pitch,0,0);
+    go2_action_pub_fun(22232400, robot_posture_yaw, robot_posture_pitch,0,0);
 
     // // 输出目标角度
     // std::cout << "yaw_robot-" << yaw_robot << " pitch_robot-" << pitch_robot << std::endl;
@@ -139,10 +152,11 @@ private:
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr target_angle_sub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr          odom_sub_;
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr gimbal_state_sub_;
-  rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr    action_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr    go2_action_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr    gimbal_action_pub_;
 
   // Parameters
-  std::string target_angle_topic_, odom_topic_, gimbal_state_topic_, sport_cmd_topic_;
+  std::string target_angle_topic_, odom_topic_, gimbal_state_topic_, sport_cmd_topic_, joy_cmd_topic_;
 
   // State variables
   double yaw_robot=0, pitch_robot=0, roll_robot=0;
@@ -160,7 +174,7 @@ int main(int argc, char ** argv)
   options.arguments({
     "--ros-args",
     "--params-file",
-    "/home/smx/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
+    "/home/unitree/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
   });
   auto node = std::make_shared<G1ControlNode>(options);
   rclcpp::spin(node);

@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
   options.arguments({
     "--ros-args",
     "--params-file",
-    "/home/smx/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
+    "/home/unitree/ros2_ws/LeggedRobot/src/Ros2AmovG1/config.yaml"
   });
   auto node = std::make_shared<GimbalCameraNode>(options);
   rclcpp::spin(node);
