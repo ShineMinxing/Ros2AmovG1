@@ -16,17 +16,6 @@ g1_camera_node:
       ! videoconvert ! video/x-raw,format=BGR
       ! appsink sync=false max-buffers=1 drop=true
 
-# 控制节点配置
-g1_control_node:
-  ros__parameters:
-    # 输入话题名
-    TARGET_ANGLE_TOPIC:  "SMX/TargetImageAngle"
-    ODOM_TOPIC:          "SMX/Odom"
-    GIMBAL_STATE_TOPIC:  "SMX/GimbalState"
-    # 输出话题名
-    SPORT_CMD_TOPIC:     "SMX/SportCmd"
-    JOY_CMD_TOPIC:       "SMX/JoyFloatCmd"
-
 # 云台节点配置
 g1_gimbal_node:
   ros__parameters:
