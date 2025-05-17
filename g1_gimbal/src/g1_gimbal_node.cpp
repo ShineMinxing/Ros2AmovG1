@@ -107,7 +107,7 @@ private:
     speed.yaw   = angX;
     speed.pitch = angY;
     speed.roll  = 0.0;
-    if (currentPitch > 45)  speed.pitch = 10;
+    if (currentPitch > 85)  speed.pitch = 10;
     if (currentPitch < -45) speed.pitch = -10;
     gimbal_->setGimabalSpeed(speed);
   }
