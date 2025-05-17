@@ -41,9 +41,9 @@ public:
   {
     // 声明并获取参数
     auto state_topic = declare_parameter<std::string>(
-      "GIMBAL_STATE_TOPIC", "TEST/GimbalState");
+      "GIMBAL_STATE_TOPIC", "NoYamlRead/GimbalState");
     auto cmd_topic   = declare_parameter<std::string>(
-      "GIMBAL_CMD_TOPIC",   "TEST/JoyFloatCmd");
+      "GIMBAL_CMD_TOPIC",   "NoYamlRead/JoyFloatCmd");
     auto port_name   = declare_parameter<std::string>(
       "UART_PORT",         "/dev/ttyUSB0");
     auto gimbal_id   = declare_parameter<std::string>(

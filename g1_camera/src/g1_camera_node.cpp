@@ -12,7 +12,7 @@ public:
   {
     // 参数声明和获取
     auto topic_name = this->declare_parameter<std::string>(
-      "GIMBAL_CAMERA", "TEST/GimbalCamera");
+      "GIMBAL_CAMERA", "NoYamlRead/GimbalCamera");
     auto pipeline = this->declare_parameter<std::string>(
       "GIMBAL_GSTREAMER",
       "rtspsrc location=rtsp://192.168.123.64:554/H264 "
