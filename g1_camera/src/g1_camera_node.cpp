@@ -28,9 +28,8 @@ public:
       "! appsink sync=false max-buffers=1 drop=true"
     );
 
-
-    this->get_parameter_or<bool>("pub_camera_raw_enable_", pub_camera_raw_enable_, true);
-    this->get_parameter_or<bool>("pub_camera_compressed_enable_", pub_camera_compressed_enable_, true);
+    pub_camera_raw_enable_ = this->declare_parameter<bool>("pub_camera_raw_enable", false);
+    pub_camera_compressed_enable_ = this->declare_parameter<bool>("pub_camera_compressed_enable", false);
 
     // 创建 Publisher    
     if (pub_camera_compressed_enable_) {
