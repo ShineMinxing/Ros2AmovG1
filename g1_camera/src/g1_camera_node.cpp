@@ -49,7 +49,7 @@ public:
         return;
       }
       timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(33),
+        std::chrono::milliseconds(100),
         std::bind(&GimbalCameraNode::timerCallback, this)
       );
     }

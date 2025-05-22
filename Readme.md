@@ -1,3 +1,7 @@
 sudo chmod 777 /dev/ttyUSB0  
 https://docs.amovlab.com/gimbalwiki/#/src/G1/doc/AmovGimbalSDK4C++
 
+ros2 run image_transport republish compressed raw \
+  --ros-args \
+    --remap in/compressed:=/SMX/GimbalCamera_Compressed \
+    --remap out:=/SMX/Go2Camera_Compressed2Raw
