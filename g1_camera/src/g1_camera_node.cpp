@@ -1,5 +1,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <chrono>
@@ -13,8 +14,9 @@ public:
     // 参数声明和获取
     auto topic_name = this->declare_parameter<std::string>(
       "GIMBAL_CAMERA", "NoYamlRead/GimbalCamera");
-    auto pipeline = this->declare_parameter<std::string>(
-      "GIMBAL_GSTREAMER",
+    std::string gst_pipeline;
+    this->get_parameter_or<std::string>(
+      "GIMBAL_GSTREAMER", gst_pipeline,
       "rtspsrc location=rtsp://192.168.123.64:554/H264 "
       "protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true "
       "! rtph264depay "
@@ -26,45 +28,72 @@ public:
       "! appsink sync=false max-buffers=1 drop=true"
     );
 
-    // 创建 Publisher
-    image_pub_ = this->create_publisher<sensor_msgs::msg::Image>(
-      topic_name, 10);
 
-    // 打开 GStreamer RTSP 管线
-    cap_.open(pipeline, cv::CAP_GSTREAMER);
-    if (!cap_.isOpened()) {
-      RCLCPP_ERROR(this->get_logger(),
-        "Failed to open GStreamer pipeline: %s", pipeline.c_str());
-    } else {
-      RCLCPP_INFO(this->get_logger(),
-        "RTSP stream opened on topic %s", topic_name.c_str());
+    this->get_parameter_or<bool>("pub_camera_raw_enable_", pub_camera_raw_enable_, true);
+    this->get_parameter_or<bool>("pub_camera_compressed_enable_", pub_camera_compressed_enable_, true);
+
+    // 创建 Publisher    
+    if (pub_camera_compressed_enable_) {
+      pub_camera_compressed_ = this->create_publisher<sensor_msgs::msg::CompressedImage>(
+        topic_name + "_Compressed", 10);
+    }
+    if (pub_camera_raw_enable_) {
+      pub_camera_raw_ = this->create_publisher<sensor_msgs::msg::Image>(
+        topic_name + "_Raw", 10);
     }
 
     // 定时器：每 33ms 发布一帧
-    timer_ = this->create_wall_timer(
-      std::chrono::milliseconds(33),
-      std::bind(&GimbalCameraNode::timerCallback, this)
-    );
+    if (pub_camera_raw_enable_ || pub_camera_compressed_enable_) {
+      cap_.open(gst_pipeline, cv::CAP_GSTREAMER);
+      if (!cap_.isOpened()) {
+        RCLCPP_ERROR(this->get_logger(), "无法打开视频流");
+        return;
+      }
+      timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(33),
+        std::bind(&GimbalCameraNode::timerCallback, this)
+      );
+    }
   }
 
 private:
   void timerCallback()
   {
-    if (!cap_.isOpened()) return;
     cv::Mat frame;
-    cap_ >> frame;
-    if (frame.empty()) return;
+    if (cap_.read(frame)) {
+      if (pub_camera_raw_enable_) {
+        auto msg = sensor_msgs::msg::Image();
+        msg.header = msg.header;
+        msg.height = frame.rows;
+        msg.width  = frame.cols;
+        msg.encoding     = "bgr8";
+        msg.is_bigendian = false;
+        msg.step         = static_cast<sensor_msgs::msg::Image::_step_type>(frame.step);
+        msg.data.assign(frame.datastart, frame.dataend);
+        pub_camera_raw_->publish(msg);
+      }
 
-    auto img_msg = cv_bridge::CvImage(
-      std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-    img_msg->header.stamp = this->now();
-    img_msg->header.frame_id = "camera_link";
-    image_pub_->publish(*img_msg);
+      if (pub_camera_compressed_enable_) {
+        std::vector<uchar> buf;
+        cv::imencode(".jpg", frame, buf);
+        sensor_msgs::msg::CompressedImage cim;
+        cim.header.stamp    = this->get_clock()->now();
+        cim.header.frame_id = "camera";
+        cim.format = "jpeg";
+        cim.data   = std::move(buf);
+        pub_camera_compressed_->publish(cim);
+      }
+    } else {
+      RCLCPP_WARN(this->get_logger(), "采集视频帧失败");
+    }
   }
 
-  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub_camera_raw_;
+  rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr pub_camera_compressed_;
   cv::VideoCapture cap_;
   rclcpp::TimerBase::SharedPtr timer_;
+  bool pub_camera_raw_enable_;
+  bool pub_camera_compressed_enable_;
 };
 
 int main(int argc, char ** argv)

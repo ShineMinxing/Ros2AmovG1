@@ -15,6 +15,8 @@ g1_camera_node:
       ! video/x-raw,format=(string)BGRx
       ! videoconvert ! video/x-raw,format=BGR
       ! appsink sync=false max-buffers=1 drop=true
+    pub_camera_raw_enable_: false
+    pub_camera_compressed_enable_: true
 
 # 云台节点配置
 g1_gimbal_node:
