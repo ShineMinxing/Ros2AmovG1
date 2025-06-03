@@ -14,9 +14,9 @@ public:
     // 参数声明和获取
     auto topic_name = this->declare_parameter<std::string>(
       "GIMBAL_CAMERA", "NoYamlRead/GimbalCamera");
-    std::string gst_pipeline;
-    this->get_parameter_or<std::string>(
-      "GIMBAL_GSTREAMER", gst_pipeline,
+    // 手动读取参数文件内容
+    std::string gst_pipeline = this->declare_parameter<std::string>(
+      "GIMBAL_GSTREAMER", 
       "rtspsrc location=rtsp://192.168.123.64:554/H264 "
       "protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true "
       "! rtph264depay "
@@ -27,6 +27,8 @@ public:
       "! videoconvert ! video/x-raw,format=BGR "
       "! appsink sync=false max-buffers=1 drop=true"
     );
+
+    RCLCPP_INFO(this->get_logger(), "Loaded pipeline: \"%s\"", gst_pipeline.c_str());
 
     pub_camera_raw_enable_ = this->declare_parameter<bool>("pub_camera_raw_enable", false);
     pub_camera_compressed_enable_ = this->declare_parameter<bool>("pub_camera_compressed_enable", false);

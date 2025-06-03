@@ -8,14 +8,12 @@ g1_camera_node:
     GIMBAL_GSTREAMER: >-
       rtspsrc location=rtsp://192.168.123.64:554/H264
       protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true
-      ! rtph264depay
-      ! h264parse
-      ! nvv4l2decoder enable-max-performance=1 disable-dpb=1
-      ! nvvidconv output-buffers=1
-      ! video/x-raw,format=(string)BGRx
-      ! videoconvert ! video/x-raw,format=BGR
-      ! appsink sync=false max-buffers=1 drop=true
-    pub_camera_raw_enable: false
+      ! decodebin
+      ! videoconvert
+      ! video/x-raw,format=BGR
+      ! appsink sync=false max-buffers=1 drop=true 
+
+    pub_camera_raw_enable: true
     pub_camera_compressed_enable: true
 
 # 云台节点配置
