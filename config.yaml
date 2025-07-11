@@ -7,11 +7,13 @@ g1_camera_node:
     # GStreamer RTSP 管线字符串（支持换行，用 YAML 折叠样式）
     GIMBAL_GSTREAMER: >-
       rtspsrc location=rtsp://192.168.123.64:554/H264
-      protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true
-      ! decodebin
+      latency=50 drop-on-latency=true
+      ! rtph264depay
+      ! h264parse
+      ! avdec_h264
       ! videoconvert
       ! video/x-raw,format=BGR
-      ! appsink sync=false max-buffers=1 drop=true 
+      ! appsink sync=false max-buffers=1 drop=true
 
     pub_camera_raw_enable: true
     pub_camera_compressed_enable: true
