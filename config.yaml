@@ -5,15 +5,31 @@ g1_camera_node:
     GIMBAL_CAMERA: "SMX/GimbalCamera"
 
     # GStreamer RTSP 管线字符串（支持换行，用 YAML 折叠样式）
+    # GIMBAL_GSTREAMER: >-
+    #   rtspsrc location=rtsp://192.168.123.64:554/H264
+    #   latency=50 drop-on-latency=true
+    #   ! rtph264depay
+    #   ! h264parse
+    #   ! avdec_h264
+    #   ! videoconvert
+    #   ! video/x-raw,format=BGR
+    #   ! appsink sync=false max-buffers=1 drop=true
+
+    # amd64 gpu4060 参数
     GIMBAL_GSTREAMER: >-
       rtspsrc location=rtsp://192.168.123.64:554/H264
-      latency=50 drop-on-latency=true
+      protocols=GST_RTSP_LOWER_TRANS_TCP
+      latency=150 drop-on-latency=false
+      ! queue max-size-buffers=0 max-size-bytes=0 max-size-time=0
       ! rtph264depay
-      ! h264parse
-      ! avdec_h264
+      ! h264parse config-interval=-1
+      ! video/x-h264,stream-format=byte-stream,alignment=au
+      ! nvh264dec
       ! videoconvert
       ! video/x-raw,format=BGR
       ! appsink sync=false max-buffers=1 drop=true
+
+
 
     pub_camera_raw_enable: true
     pub_camera_compressed_enable: true
