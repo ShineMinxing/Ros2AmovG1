@@ -4,15 +4,16 @@ g1_camera_node:
     # 发布的 Image 话题名称
     GIMBAL_CAMERA: "SMX/GimbalCamera"
 
-    # GStreamer RTSP 管线字符串（支持换行，用 YAML 折叠样式）
+    # Jetson Nano 参数
     # GIMBAL_GSTREAMER: >-
     #   rtspsrc location=rtsp://192.168.123.64:554/H264
-    #   latency=50 drop-on-latency=true
+    #   protocols=GST_RTSP_LOWER_TRANS_UDP latency=50 drop-on-latency=true
     #   ! rtph264depay
     #   ! h264parse
-    #   ! avdec_h264
-    #   ! videoconvert
-    #   ! video/x-raw,format=BGR
+    #   ! nvv4l2decoder enable-max-performance=1 disable-dpb=1
+    #   ! nvvidconv output-buffers=1
+    #   ! video/x-raw,format=(string)BGRx
+    #   ! videoconvert ! video/x-raw,format=BGR
     #   ! appsink sync=false max-buffers=1 drop=true
 
     # amd64 gpu4060 参数
