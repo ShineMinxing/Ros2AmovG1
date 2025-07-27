@@ -43,7 +43,7 @@ public:
     auto state_topic = declare_parameter<std::string>(
       "GIMBAL_STATE_TOPIC", "NoYamlRead/GimbalState");
     auto cmd_topic   = declare_parameter<std::string>(
-      "GIMBAL_CMD_TOPIC",   "NoYamlRead/JoyFloatCmd");
+      "GIMBAL_CMD_TOPIC",   "NoYamlRead/SportCmd");
     auto port_name   = declare_parameter<std::string>(
       "UART_PORT",         "/dev/ttyUSB0");
     auto gimbal_id   = declare_parameter<std::string>(
@@ -97,8 +97,8 @@ private:
   void onTargetAngle(
     const std_msgs::msg::Float64MultiArray::SharedPtr msg)
   {
-    if (msg->data.size() < 3 || msg->data[0] != 30000001) return;
-    double angX = msg->data[1], angY = msg->data[2];
+    if (msg->data.size() < 3 || msg->data[0] != 22202100) return;
+    double angX = -50*msg->data[1], angY = -50*msg->data[2];
     double currentYaw=0, currentPitch=0;
     { std::lock_guard<std::mutex> lock(mt_);
       currentYaw = frameYaw_; currentPitch = imuPitch_; }

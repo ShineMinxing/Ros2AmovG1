@@ -4,7 +4,7 @@ g1_gimbal_node:
     # 发布云台状态话题
     GIMBAL_STATE_TOPIC: "SMX/GimbalState"
     # 订阅云台控制命令话题
-    GIMBAL_CMD_TOPIC:   "SMX/JoyFloatCmd"
+    GIMBAL_CMD_TOPIC:   "SMX/SportCmd"
     # 串口设备路径
     UART_PORT:          "/dev/ttyUSB0"
     # 云台设备 ID
