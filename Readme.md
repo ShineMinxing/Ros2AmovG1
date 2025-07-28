@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Ros2AmovG1** 是在 **ROS 2 Humble / Ubuntu 22.04** 环境下驱动 **Amov G1 三轴云台** 的控制仓库，基于官方 **C++ SDK** 封装成 ROS Node，提供串口通讯、话题控制与状态发布功能。
+**Ros2AmovG1** 是在 **ROS 2 Humble / Ubuntu 22.04** 环境下驱动 **Amov G1 三轴云台** 的控制仓库，基于官方 **C++ SDK** [https://docs.amovlab.com/gimbalwiki/#/src/G1/doc/AmovGimbalStudio](https://docs.amovlab.com/gimbalwiki/#/src/G1/doc/AmovGimbalStudio)封装成 ROS Node，提供串口通讯、话题控制与状态发布功能。
 
 ---
 
