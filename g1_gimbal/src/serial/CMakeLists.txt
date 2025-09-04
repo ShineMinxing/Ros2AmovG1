@@ -6,7 +6,6 @@ if(APPLE)
 endif()
 
 add_library(serial SHARED)
-# add_library(serial::lib ALIAS serial)
 
 ## Sources
 set(serial_SRCS
@@ -14,20 +13,18 @@ set(serial_SRCS
 )
 
 if(APPLE)
-    # If OSX
+    # OSX
     list(APPEND serial_SRCS src/impl/unix.cc)
     list(APPEND serial_SRCS src/impl/list_ports/list_ports_osx.cc)
 elseif(UNIX)
-    # If unix
+    # Linux
     list(APPEND serial_SRCS src/impl/unix.cc)
     list(APPEND serial_SRCS src/impl/list_ports/list_ports_linux.cc)
 else()
-    # If windows
+    # Windows
     list(APPEND serial_SRCS src/impl/win.cc)
     list(APPEND serial_SRCS src/impl/list_ports/list_ports_win.cc)
 endif()
-
-#add_library(serial SHARED ${serial_SRCS})
 
 target_sources(serial 
     PRIVATE
@@ -48,7 +45,7 @@ target_include_directories(serial
     include
 )
 
-## Add serial library
+## Link system libs
 if(APPLE)
     target_link_libraries(serial ${FOUNDATION_LIBRARY} ${IOKIT_LIBRARY})
 elseif(UNIX)
@@ -57,5 +54,14 @@ else()
     target_link_libraries(serial setupapi)
 endif()
 
-install()
+# 安装库文件
+install(TARGETS serial
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
+# 安装头文件
+install(DIRECTORY include/
+  DESTINATION include
+)
